@@ -28,14 +28,10 @@ const handleSignUp = (event) => {
           username: newUsername,
           password_digest: newUserPw
               })  
-})
-.then(response => response.json())
-.then(data => console.log(data))
+    })
+    .then(response => response.json())
+    .then(data => console.log(data))
 }
-
-
-
-
 
     return(
     <div>
