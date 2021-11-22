@@ -1,19 +1,34 @@
 import React, { useState, useEffect } from 'react'
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
-function Home() {
+function Home({setCurrentUser, currentUser}) {
+const navigate = useNavigate();
 
-const [newUsername, setNewUsername] = useState("")
-const [newUserPw, setNewUserPw] = useState("")
+const [newUser, setNewUser] = useState({
+ username: '', 
+ password: '',
+ password_confirmation: '',   
+})
+// const [newUserPw, setNewUserPw] = useState("")
 
-
-const updateUser = (evt) => {
-    setNewUsername( evt.target.value);
+const handleChange = (e) => {
+    setNewUser({
+        ...newUser,
+        [e.target.name]: e.target.value
+    })
 }
-const updatePw = (evt) => {
-    setNewUserPw( evt.target.value);
+
+const logoutButton = () => {
+    if(!!currentUser) {
+        return <button onClick={handleLogout}>Logout</button>
+    }
 }
 
+const handleLogout = () => {
+        fetch("/logout", {
+            method: "DELETE",
+          }).then(() => setCurrentUser(''));
+        }
 
 const handleSignUp = (event) => {
     
@@ -25,37 +40,49 @@ const handleSignUp = (event) => {
           "Content-Type": "application/json",
       },
       body: JSON.stringify({
-          username: newUsername,
-          password_digest: newUserPw
+          username: newUser.username,
+          password: newUser.password,
+          password_confirmation: newUser.password_confirmation
               })  
     })
-    .then(response => response.json())
-    .then(data => console.log(data))
+    .then(response => {
+        if(response.created) {
+            response.json().then((userData) => setCurrentUser(userData))
+        }
+    })
+    
+    navigate('/')
 }
 
     return(
     <div>
         <div>
-        <NavLink to="GameTwo">
+        <NavLink to="gameTwo">
             <button>Speed Typer</button>
         </NavLink>
 
-        <NavLink to="Flappybird">
+        <NavLink to="flappybird">
             <button>Flappybird</button>
         </NavLink>
 
-        <NavLink to="GameThree">
+        <NavLink to="gameThree">
             <button>Reacteroids</button>
+        </NavLink>
+        <NavLink to="login">
+            <button>Login</button>
         </NavLink>
         </div>
         <div>
             <form id="signupform" onSubmit={handleSignUp}><br></br>
                 <label >Username:</label>
-                <input type="text" id="username" name="username" onChange={updateUser}></input><br></br>
+                <input type="text" id="username" name="username" value={newUser.username} onChange={handleChange}></input><br></br>
                 <label >Password:</label>
-                <input type="password" id="password"name="password" onChange={updatePw}></input><br></br><br></br>
+                <input type="password" id="password"name="password" value={newUser.password} onChange={handleChange}></input><br></br>
+                <label >Password Confirmation:</label>
+                <input type="password" id="password_1confirmation" name="password_confirmation" value={newUser.password_confirmation} onChange={handleChange}></input><br></br><br></br>
                 <input type="submit" value="Sign Up"></input>
             </form>
+            {logoutButton()}
         </div>
     </div>
     
